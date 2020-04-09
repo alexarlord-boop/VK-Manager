@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{%if current_user.is_authenticated%}
+
+<div class="row mx-auto mt-4">
+    {% for card in cards%}
+    <div class="col-3 mx-auto">
+        <div class="card text-center">
+        <img src={{card.img}} class="card-img-top" alt="...">
+        <div class="card-body">
+        <h5 class="card-title">{{card.title}}</h5>
+        <p class="card-text">Some quick example text</p>
+        <a href={{card.link}} class="btn btn-primary">Move to {{card.title}}</a>
+        </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{%endif%}
+{% endblock %}

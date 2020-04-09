@@ -1,0 +1,26 @@
+{%extends 'base.html'%}
+{%block content%}
+<form action="" method="post" class="mx-auto col-6 mt-4">
+    <h1 class="text-center">Авторизация VK</h1>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control", type="email") }}
+        {% for error in form.email.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.password.label }}<br>
+        {{ form.password(class="form-control", type="password") }}
+        {% for error in form.password.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p class="text-center">{{ form.submit(type="submit", class="btn btn-primary col-2 mx-auto") }}</p>
+</form>
+{%endblock%}

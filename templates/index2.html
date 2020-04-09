@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container col-12 ml-2">
+            <div class="row mt-2 ">
+                <div class=""><img src={{data['group']['photo']}}></div>
+                <div class="mt-2">
+                    <h2 class="ml-2">{{data['group']['name']}}</h2>
+                    <h3 class="ml-2">Members: {{data['group']['members']}}</h3>
+                </div>
+            </div>
+    <div class="col-6 mx-auto">
+        <h1 class="text-center">Activities</h1>
+        {%set titles = ['Comments', 'Likes', 'Subscribed', 'UnSubscribed']%}
+        {%set act = data['act']%}
+         {% for key in act %}
+                <table class="table">
+                    <tbody>
+                        <tr class="table-success">
+                            <td class="col-4 ">{{titles[loop.index - 1]}}</td>
+                            <td class="col-4 bg-success">{{act[key]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            {%endfor%}
+        <h1 class="text-center">Ages</h1>
+        {%set ta = data['ta']%}
+        {% for key in ta %}
+                <table class="table">
+                    <tbody>
+                        <tr class="table-primary">
+                            <td class="col-4">{{key}}</td>
+                            <td class="col-4 bg-info">{{ta[key]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            {%endfor%}
+        <h1 class="text-center">Gender</h1>
+        {% set g = ['Female', 'Male']%}
+        {%set ts = data['ts']%}
+        {% for key in ts %}
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td class="col-4">{{g[loop.index - 1]}}</td>
+                            <td class="col-4">{{ts[key]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            {%endfor%}
+        <h1 class="text-center">City</h1>
+        {%set tc = data['tc']%}
+        {% for key in tc %}
+                <table class="table">
+                    <tbody>
+                        <tr class="table-warning">
+                            <td class="col-4">{{key}}</td>
+                            <td class="col-4 bg-warning">{{tc[key]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            {%endfor%}
+
+    </div>
+</div>
+{% endblock %}

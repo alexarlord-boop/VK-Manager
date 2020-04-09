@@ -1,0 +1,101 @@
+import os
+import json
+from flask_restful import abort, Api, Resource
+from flask import jsonify
+import datetime
+from vkdata import format_vk_event_date
+from data import db_session
+from data.users import User
+from api.parser import parser
+
+
+def abort_if_users_not_found(page_id):
+    res = None
+    with open(f"data/pages/publics.txt") as f:
+        data = f.readlines()
+        for page in data:
+            page = json.loads(page)
+            print(page)
+            if int(page_id) == int(page['id']):
+                res = page
+    if res is None:
+        abort(404, message=f"User {page_id} not found")
+
+
+class PageResource(Resource):  # возможно не работает корректно!
+    def get(self, typ, page_id):
+        print(page_id)
+        res = None
+        abort_if_users_not_found(page_id)
+        with open(f"data/pages/{typ}.txt") as f:
+            data = f.readlines()
+            for page in data:
+                page = json.loads(page)
+                # print(page)
+                if page_id == page['id']:
+                    res = page
+        return jsonify({'page': res})
+
+    def delete(self, user_id):
+        # abort_if_users_not_found(typ, user_id)
+        pass
+
+
+class PublicsListResource(Resource):
+    def get(self, activity):
+        res = list()
+        with open(f"data/pages/publics.txt") as f:
+            data = f.readlines()
+            for page in data:
+                page = json.loads(page)
+
+                if activity == 'all':
+                    res.append(page)
+
+                if activity in page['activity'].lower():
+                    print(page)
+                    res.append(page)
+
+        return jsonify({'pages': res})
+
+
+class GroupsListResource(Resource):
+    def get(self, activity):
+        res = list()
+        with open(f"data/pages/groups.txt") as f:
+            data = f.readlines()
+            for page in data:
+                page = json.loads(page)
+
+                if activity == 'all':
+                    res.append(page)
+
+                if activity == page['activity']:
+                    print(page)
+                    res.append(page)
+
+        return jsonify({'pages': res})
+
+
+class EventsListResource(Resource):
+    def get(self, activity):
+        res = list()
+        with open(f"data/pages/events.txt") as f:
+            data = f.readlines()
+            for page in data:
+                page = json.loads(page)
+
+                if activity == 'all':
+                    res.append(page)
+
+                now = datetime.datetime.now().date()
+                # print(now, format_vk_event_date(group['activity']))
+                # print(activity)
+                if now > format_vk_event_date(page['activity']) and activity == '0':
+                    print('yes 0')
+                    res.append(page)
+                elif now < format_vk_event_date(page['activity']) and activity == '1':
+                    res.append(page)
+
+        return jsonify({'pages': res})
+    # подключить ресурс в мэйн

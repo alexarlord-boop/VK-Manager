@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block filter %}
+    <div class="text-center mt-3 mb-5">
+        <h1>Your {{title}}</h1>
+        <h4 class="secondary">Use filter to select a list of {{title}}</h4>
+    </div>
+    <form action="" method="post" class="mx-auto col-6 text-center">
+    {{ form.hidden_tag() }}
+    {{form.activity.label}}<br>
+    {{form.activity(class="form-control")}}
+
+            {% for error in form.activity.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+    {{form.submit(type='submit' ,class="btn btn-primary col-2 mx-auto mt-2")}}
+    </form>
+{% endblock %}
+
+{% block content%}
+<div class="mx-auto col-8">
+   {%for g in groups%}
+        <div class="row my-2">
+                <div class="" ><a class="link" ><img src={{g['photo']}} class="rounded"></a></div>
+                <div class="">
+                    <h5 class=" col-auto">{{g['name']}}</h5>
+                </div>
+
+        </div>
+<!--    <span class="badge badge-primary badge-pill">14</span>-->
+{%endfor%}
+</div>
+
+{% endblock%}
