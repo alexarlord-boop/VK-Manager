@@ -66,11 +66,25 @@ class GroupsListResource(Resource):
             data = f.readlines()
             for page in data:
                 page = json.loads(page)
-
+                if page in res:
+                    continue
                 if activity == 'all':
                     res.append(page)
 
-                if activity == page['activity']:
+                elif activity in page['name']:
+                    print(page)
+                    res.append(page)
+
+        with open(f"data/pages/publics.txt") as f:
+            data = f.readlines()
+            for page in data:
+                page = json.loads(page)
+                if page in res:
+                    continue
+                if activity == 'all':
+                    res.append(page)
+
+                elif activity in page['activity'].lower():
                     print(page)
                     res.append(page)
 

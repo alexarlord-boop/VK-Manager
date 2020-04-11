@@ -8,11 +8,7 @@ from sqlalchemy_serializer import SerializerMixin
 
 
 class GroupFilterForm(FlaskForm):
-    access = SelectField('Доступ', choices=[('all', 'Все'), ('Открытая группа', 'Открытая группа'),
+    activity = SelectField('Доступ', choices=[('all', 'Все'), ('Открытая группа', 'Открытая группа'),
                                               ('Закрытая группа', 'Закрытая группа')])
-
-    activity = SelectField('Активность', choices=[('all', 'Все'), ('кино', 'Кино'), ('прогр', 'Программирование'),
-                                                  ('юмор', 'Юмор'), ('образ', 'Образование'),
-                                                  ('курс', 'Курсы'), ('игр', 'Игры')])
 
     submit = SubmitField('Show')

@@ -7,6 +7,7 @@ from sqlalchemy_serializer import SerializerMixin
 
 
 class FilterForm(FlaskForm):
+    # typ = SelectField('')
     activity = SelectField('Активность', choices=[('all', 'Все'), ('кино', 'Кино'), ('прогр', 'Программирование'),
                                                     ('юмор', 'Юмор'), ('образ', 'Образование'),
                                                     ('курс', 'Курсы'), ('игр', 'Игры')])

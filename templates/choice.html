@@ -3,19 +3,27 @@
 
 {%if current_user.is_authenticated%}
 
-<div class="row mx-auto mt-4">
-    {% for card in cards%}
-    <div class="col-3 mx-auto">
+<div class="row mx-auto col-6 mt-4">
+    <div class="col-6">
         <div class="card text-center">
-        <img src={{card.img}} class="card-img-top" alt="...">
+        <img src={{cards[0]['img']}} class="card-img-top" alt="...">
         <div class="card-body">
-        <h5 class="card-title">{{card.title}}</h5>
+        <h5 class="card-title">{{cards[0]['title']}}</h5>
         <p class="card-text">Some quick example text</p>
-        <a href={{card.link}} class="btn btn-primary">Move to {{card.title}}</a>
+        <a href={{cards[0].link}} class="btn btn-primary col-12">{{cards[0]['title']}}</a>
         </div>
         </div>
     </div>
-    {% endfor %}
+    <div class="col-6 mx-auto">
+        <div class="card text-center">
+        <img src={{cards[1]['img']}} class="card-img-top" alt="...">
+        <div class="card-body">
+        <h5 class="card-title">{{cards[1]['title']}}</h5>
+        <p class="card-text">Some quick example text</p>
+        <a href={{cards[1].link}} class="btn btn-primary col-12">{{cards[1]['title']}}</a>
+        </div>
+        </div>
+    </div>
 </div>
 {%endif%}
 {% endblock %}

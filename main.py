@@ -39,17 +39,16 @@ def load_user(user_id):
 
 def get_group(group_id):
     group = vk.groups.getById(group_id=group_id,
-                              fields=['members_count', 'activity', 'wall'])[0]
+                              fields=['activity', 'wall'])[0]
     group_id = group['id']
     group_act = group['activity']
 
     # print(group['activity'])
-    group_members = group['members_count']
+
     group_name = group['name']
     group_photo = group[f'photo_100']
 
-    group_data = {"id": group_id, "name": group_name, "activity": group_act, "photo": group_photo,
-                  "members": group_members}
+    group_data = {"id": group_id, "name": group_name, "activity": group_act, "photo": group_photo}
 
     return group_data
 
@@ -65,7 +64,7 @@ def preload(typ, count):
     print('preloading', typ)
 
     if count == 1:
-        user_groups_id = vk.groups.get(filter=typ, count=5)
+        user_groups_id = vk.groups.get(filter=typ)
     else:
         user_groups_id = vk.groups.get(filter=typ, count=count)
 
@@ -81,34 +80,12 @@ def preload(typ, count):
 
 
 def get_with_filter(typ, filter):
+    print(typ)
     result = list()
     activity = filter.activity.data
     print(activity)
     pages = get(f'http://localhost:5000/api/v1/pages/{typ}/{activity}').json()['pages']
-    # print(pages)
-    # for page in pages:
-    #     if activity == 'all':
-    #         result.append(page)
-    #
-    #     elif typ == 'publics':
-    #         if activity in page['activity'].lower():
-    #             print(page)
-    #             result.append(page)
-    #
-    #     elif typ == 'groups':
-    #         if activity == page['activity']:
-    #             print(page)
-    #             result.append(page)
-    #
-    #     elif typ == 'events':
-    #         now = datetime.datetime.now().date()
-    #         # print(now, format_vk_event_date(group['activity']))
-    #         # print(activity)
-    #         if now > format_vk_event_date(page['activity']) and activity == '0':
-    #             print('yes 0')
-    #             result.append(page)
-    #         elif now < format_vk_event_date(page['activity']) and activity == '1':
-    #             result.append(page)
+
     return pages
 
 
@@ -177,9 +154,7 @@ def intro():
 @app.route('/choice', methods=['GET', 'POST'])
 def choice():
     print(session)
-    main_choice = [{'title': 'Publics', 'link': '/vkg/filter/publics/1',
-                    'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'},
-                   {'title': 'Groups', 'link': '/vkg/filter/groups/1',
+    main_choice = [{'title': 'Groups&Publics', 'link': '/vkg/filter/groups/1',
                     'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'},
                    {'title': 'Events', 'link': '/vkg/filter/events/1',
                     'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'}]
@@ -188,12 +163,16 @@ def choice():
 
 @app.route('/vkg/filter/<typ>/<int:count>', methods=['GET', 'POST'])
 def filter(typ, count):
-    forms = {'publics': FilterForm(), 'groups': GroupFilterForm(), 'events': EventFilterForm()}
+    forms = {'groups': FilterForm(), 'events': EventFilterForm()}
     form = forms[typ]
 
     try:
         if not os.path.exists(f"data/pages/{typ}.txt"):
-            preload(typ, count)
+            if typ == 'groups':
+                preload('groups', count)
+                preload('publics', count)
+            else:
+                preload('events', count)
         else:
             # применение фильтра
             fields = form
