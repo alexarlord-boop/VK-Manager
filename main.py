@@ -64,7 +64,7 @@ def preload(typ, count):
     print('preloading', typ)
 
     if count == 1:
-        user_groups_id = vk.groups.get(filter=typ)
+        user_groups_id = vk.groups.get(filter=typ, count=20)
     else:
         user_groups_id = vk.groups.get(filter=typ, count=count)
 
@@ -78,14 +78,25 @@ def preload(typ, count):
             session[f'user_{typ}'].append(group)
 
 
+def get_gnp_with_filter(filter):
+    print('getting gnp with filter')
+    activity = filter.activity.data
+    # print(activity)
+    groups = get(f'http://localhost:5000/api/v1/pages/groups/{activity}').json()['pages']
+    publics = get(f'http://localhost:5000/api/v1/pages/publics/{activity}').json()['pages']
+    # print('GROUPS:', groups)
+    groups.extend(publics)
+    pages = groups
+    # print('PAGES:', pages)
+    return pages
 
-def get_with_filter(typ, filter):
-    print(typ)
-    result = list()
+
+def get_events_with_filter(filter):
+    print('getting gnp with filter')
     activity = filter.activity.data
     print(activity)
-    pages = get(f'http://localhost:5000/api/v1/pages/{typ}/{activity}').json()['pages']
-
+    pages = get(f'http://localhost:5000/api/v1/pages/events/{activity}').json()['pages']
+    print(pages)
     return pages
 
 
@@ -165,7 +176,8 @@ def choice():
 def filter(typ, count):
     forms = {'groups': FilterForm(), 'events': EventFilterForm()}
     form = forms[typ]
-
+    filtered_groups = list()
+    print(typ)
     try:
         if not os.path.exists(f"data/pages/{typ}.txt"):
             if typ == 'groups':
@@ -174,14 +186,19 @@ def filter(typ, count):
             else:
                 preload('events', count)
         else:
-            # применение фильтра
+            # # применение фильтра
             fields = form
-            filtered_groups = get_with_filter(typ, fields)
-            return render_template('pages.html', title=typ, form=form, groups=filtered_groups)
+            if typ == 'groups':
+                filtered_groups = get_gnp_with_filter(fields)
+            if typ == 'events':
+                filtered_groups = get_events_with_filter(fields)
     except Exception as e:
         print('FILTER ERROR:', e)
 
-    return render_template('pages.html', title=typ, form=form, groups=session[f'user_{typ}'])
+    if typ == 'groups':
+        return render_template('gnp.html', form=form, groups=filtered_groups)
+    if typ == 'events':
+        return render_template('events.html', form=form, groups=filtered_groups)
 
 
 if __name__ == '__main__':
@@ -193,7 +210,6 @@ if __name__ == '__main__':
     api.add_resource(PageResource, '/api/v1/pages/publics/<int:page_id>')
 
     api.add_resource(GroupsListResource, '/api/v1/pages/groups/<string:activity>')
-
 
     api.add_resource(EventsListResource, '/api/v1/pages/events/<string:activity>')
     app.run()
