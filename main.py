@@ -37,20 +37,13 @@ def load_user(user_id):
     return dbs.query(User).get(user_id)
 
 
-def get_group(group_id):
-    group = vk.groups.getById(group_id=group_id,
-                              fields=['activity', 'wall'])[0]
-    group_id = group['id']
-    group_act = group['activity']
-
-    # print(group['activity'])
-
-    group_name = group['name']
-    group_photo = group[f'photo_100']
-
-    group_data = {"id": group_id, "name": group_name, "activity": group_act, "photo": group_photo}
-
-    return group_data
+def get_group(group_ids):
+    group_ids = ','.join(list(map(str, group_ids)))
+    print(group_ids)
+    groups = vk.groups.getById(group_ids=group_ids,
+                               fields=['activity'])
+    print(groups)
+    return groups
 
 
 def preload(typ, count):
@@ -64,18 +57,20 @@ def preload(typ, count):
     print('preloading', typ)
 
     if count == 1:
-        user_groups_id = vk.groups.get(filter=typ, count=20)
+        user_groups_id = vk.groups.get(filter=typ, count=20)['items']
     else:
-        user_groups_id = vk.groups.get(filter=typ, count=count)
+        user_groups_id = vk.groups.get(filter=typ, count=count)['items']
 
+    groups = get_group(user_groups_id)
+    # print(user_groups_id)
     with open(f'data/pages/{typ}.txt', 'w') as f:
-        for g_id in user_groups_id['items']:  # предзагрузка всех групп
-            group = get_group(g_id)
-            if group is None:
-                continue
-
+        for group in groups:
             f.write(f"{json.dumps(group)}\n")
-            session[f'user_{typ}'].append(group)
+            #session[f'user_{typ}'].append(group)
+            # f.write(group)
+
+
+        # print(groups)
 
 
 def get_gnp_with_filter(filter):
