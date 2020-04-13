@@ -57,7 +57,7 @@ def preload(typ, count):
     print('preloading', typ)
 
     if count == 1:
-        user_groups_id = vk.groups.get(filter=typ, count=20)['items']
+        user_groups_id = vk.groups.get(filter=typ)['items']
     else:
         user_groups_id = vk.groups.get(filter=typ, count=count)['items']
 
