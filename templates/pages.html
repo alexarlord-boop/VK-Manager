@@ -1,17 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content%}
+<div class='container'>
+    <h3>Test</h3>
+        <form>
+            <a href=# id=test><button class='btn btn-default'>Test</button></a>
+        </form>
 
-<div class="mx-auto col-8">
+</div>
+<div class="mx-auto col-10">
     {% block filter %} {% endblock %}
+    {% block info%}{% endblock %}
     {%for g in groups%}
         <div class="row my-2">
+            <form method="post" action="">
+                {{ page.hidden_tag() }}
+
+            <p class="text-center">{{ page.submit(type="submit", class="btn btn-danger my-4 mx-2") }}</p>
+                <p hidden>{{page.p_id(value=g['id'])}}</p>
+                <p hidden>{{page.p_typ(value=g['type'])}}</p>
+            </form>
                 <div class="" ><a class="link" ><img src={{g['photo_100']}} class="rounded"></a></div>
                 <div class="">
                     <h5 class=" col-auto">{{g['name']}}</h5>
                 </div>
+
         </div>
     {%endfor%}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type=text/javascript>
+        $(function() {
+          $('a#test').bind('click', function() {
+            $.getJSON('/background_process_test',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
+    </script>
 </div>
 
 {% endblock%}

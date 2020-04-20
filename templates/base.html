@@ -24,8 +24,9 @@
             {% if current_user.is_authenticated %}
 
                     <div class="mr-3">
+                        <a href="/deleted" style="color: #ffffff;">Недавно удаленные</a>
                         <a href="/logout" style="color: #ffffff;">Выйти</a>
-                        <img src={{current_user.photo}}>
+                        <img src={{current_user.photo}} class="rounded">
                     </div>
 
                 {% else %}

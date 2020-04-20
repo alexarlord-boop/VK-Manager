@@ -3,14 +3,15 @@ import asyncio
 import datetime
 import os
 import json
-from requests import get
+from requests import get, delete
 from flask_restful import reqparse, abort, Api, Resource
-from api.pages_api import PageResource, PublicsListResource, GroupsListResource, EventsListResource
+from api.pages_api import PublicResource, PageResource, PublicsListResource, GroupsListResource, EventsListResource
 from flask import Flask, session
-from flask import render_template, redirect
+from flask import render_template, redirect, request
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from forms.login_form import LoginForm
 from forms.filter import FilterForm
+from forms.page_form import PageForm
 from forms.group_filter import GroupFilterForm
 from forms.events_form import EventFilterForm
 import vk_api
@@ -18,6 +19,8 @@ from vk_api import VkApiError
 
 from data import db_session
 from data.users import User
+
+from jinja2 import contextfunction, environmentfunction
 
 # from test_async import format_vk_event_date
 
@@ -39,10 +42,10 @@ def load_user(user_id):
 
 def get_group(group_ids):
     group_ids = ','.join(list(map(str, group_ids)))
-    print(group_ids)
+    # print(group_ids)
     groups = vk.groups.getById(group_ids=group_ids,
                                fields=['activity'])
-    print(groups)
+    # print(groups)
     return groups
 
 
@@ -56,21 +59,18 @@ def preload(typ, count):
     """
     print('preloading', typ)
 
-    if count == 1:
+    if count == 'all':
         user_groups_id = vk.groups.get(filter=typ)['items']
     else:
-        user_groups_id = vk.groups.get(filter=typ, count=count)['items']
+        user_groups_id = vk.groups.get(filter=typ, count=int(count))['items']
 
     groups = get_group(user_groups_id)
     # print(user_groups_id)
     with open(f'data/pages/{typ}.txt', 'w') as f:
         for group in groups:
             f.write(f"{json.dumps(group)}\n")
-            #session[f'user_{typ}'].append(group)
+            # session[f'user_{typ}'].append(group)
             # f.write(group)
-
-
-        # print(groups)
 
 
 def get_gnp_with_filter(filter):
@@ -89,9 +89,9 @@ def get_gnp_with_filter(filter):
 def get_events_with_filter(filter):
     print('getting gnp with filter')
     activity = filter.activity.data
-    print(activity)
+    # print('activity:', activity)
     pages = get(f'http://localhost:5000/api/v1/pages/events/{activity}').json()['pages']
-    print(pages)
+    # print(pages)
     return pages
 
 
@@ -149,6 +149,11 @@ def logout():
         except Exception as e:
             print(e)
 
+    try:
+        os.remove('api/deleted.txt')
+    except Exception as e:
+        print(e)
+
     return redirect("/")
 
 
@@ -159,41 +164,52 @@ def intro():
 
 @app.route('/choice', methods=['GET', 'POST'])
 def choice():
-    print(session)
-    main_choice = [{'title': 'Groups&Publics', 'link': '/vkg/filter/groups/1',
+    # print(session)
+
+    for title in list(filter(lambda x: not os.path.exists(f"data/pages/{x}.txt"), ['groups','publics','events'])):
+        preload(title, 'all')
+
+    # move links into static
+    main_choice = [{'title': 'Groups&Publics', 'link': '/vkg/filter/groups/all',
                     'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'},
-                   {'title': 'Events', 'link': '/vkg/filter/events/1',
+                   {'title': 'Events', 'link': '/vkg/filter/events/all',
                     'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'}]
+
     return render_template('choice.html', cards=main_choice)
 
 
-@app.route('/vkg/filter/<typ>/<int:count>', methods=['GET', 'POST'])
-def filter(typ, count):
+@app.route('/vkg/filter/<typ>/<count>', methods=['GET', 'POST'])
+def filt(typ, count):
     forms = {'groups': FilterForm(), 'events': EventFilterForm()}
-    form = forms[typ]
-    filtered_groups = list()
+    filt = forms[typ]
+    page_form = PageForm()
+
+    print(filt.activity.data)
     print(typ)
-    try:
-        if not os.path.exists(f"data/pages/{typ}.txt"):
-            if typ == 'groups':
-                preload('groups', count)
-                preload('publics', count)
-            else:
-                preload('events', count)
-        else:
-            # # применение фильтра
-            fields = form
-            if typ == 'groups':
-                filtered_groups = get_gnp_with_filter(fields)
-            if typ == 'events':
-                filtered_groups = get_events_with_filter(fields)
-    except Exception as e:
-        print('FILTER ERROR:', e)
+
+
 
     if typ == 'groups':
-        return render_template('gnp.html', form=form, groups=filtered_groups)
+        filtered_groups = get_gnp_with_filter(filt)
+        print(len(filtered_groups))
+        return render_template('gnp.html', page=page_form, form=filt, groups=filtered_groups)
     if typ == 'events':
-        return render_template('events.html', form=form, groups=filtered_groups)
+        print(filt.activity)
+        filtered_groups = get_events_with_filter(filt)
+        return render_template('events.html', page=page_form, form=filt, groups=filtered_groups)
+
+#background process happening without any refreshing
+@app.route('/background_process_test')
+def background_process_test():
+    print ("Hello")
+    if request.method == 'POST':
+        if page_form.validate_on_submit():
+            # pass
+            p_id = page_form.p_id.data
+            print('deleting')
+            # print(p_id, delete(f'http://localhost:5000/api/v1/pages/{p_id}'))
+            # return redirect('/vkg/filter/groups/all')
+    return ("nothing")
 
 
 if __name__ == '__main__':
@@ -202,7 +218,7 @@ if __name__ == '__main__':
     dbs = db_session.create_session()
 
     api.add_resource(PublicsListResource, '/api/v1/pages/publics/<string:activity>')
-    api.add_resource(PageResource, '/api/v1/pages/publics/<int:page_id>')
+    api.add_resource(PageResource, '/api/v1/pages/<int:p_id>')
 
     api.add_resource(GroupsListResource, '/api/v1/pages/groups/<string:activity>')
 

@@ -10,7 +10,7 @@ class FilterForm(FlaskForm):
     # typ = SelectField('')
     activity = SelectField('Активность', choices=[('all', 'Все'), ('кино', 'Кино'), ('прогр', 'Программирование'),
                                                     ('юмор', 'Юмор'), ('образ', 'Образование'),
-                                                    ('курс', 'Курсы'), ('игр', 'Игры')])
+                                                    ('курс', 'Курсы'), ('игр', 'Игры')], validators=[DataRequired])
 
     submit = SubmitField('Show')
 
