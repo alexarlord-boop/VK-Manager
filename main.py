@@ -6,7 +6,7 @@ import json
 from requests import get, delete
 from flask_restful import reqparse, abort, Api, Resource
 from api.pages_api import PublicResource, PageResource, PublicsListResource, GroupsListResource, EventsListResource
-from flask import Flask, session
+from flask import Flask, session, jsonify
 from flask import render_template, redirect, request
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from forms.login_form import LoginForm
@@ -73,9 +73,9 @@ def preload(typ, count):
             # f.write(group)
 
 
-def get_gnp_with_filter(filter):
+def get_gnp_with_filter(activ):
     print('getting gnp with filter')
-    activity = filter.activity.data
+    activity = activ
     # print(activity)
     groups = get(f'http://localhost:5000/api/v1/pages/groups/{activity}').json()['pages']
     publics = get(f'http://localhost:5000/api/v1/pages/publics/{activity}').json()['pages']
@@ -86,12 +86,14 @@ def get_gnp_with_filter(filter):
     return pages
 
 
-def get_events_with_filter(filter):
-    print('getting gnp with filter')
-    activity = filter.activity.data
+def get_events_with_filter(activ):
+    print('getting events with filter')
+    activity = activ
     # print('activity:', activity)
+
     pages = get(f'http://localhost:5000/api/v1/pages/events/{activity}').json()['pages']
-    # print(pages)
+    print(pages)
+
     return pages
 
 
@@ -166,7 +168,7 @@ def intro():
 def choice():
     # print(session)
 
-    for title in list(filter(lambda x: not os.path.exists(f"data/pages/{x}.txt"), ['groups','publics','events'])):
+    for title in list(filter(lambda x: not os.path.exists(f"data/pages/{x}.txt"), ['groups', 'publics', 'events'])):
         preload(title, 'all')
 
     # move links into static
@@ -182,34 +184,33 @@ def choice():
 def filt(typ, count):
     forms = {'groups': FilterForm(), 'events': EventFilterForm()}
     filt = forms[typ]
-    page_form = PageForm()
 
     print(filt.activity.data)
+    activ = filt.activity.data
     print(typ)
 
+    if request.method == 'POST':
+        return redirect(f"/filtered_pages/{typ}/{activ}/{count}")
 
+    return render_template('gnp.html', form=filt)
+
+
+@app.route('/filtered_pages/<typ>/<activ>/<count>', methods=['GET', 'POST'])
+def filtered_pages(typ, activ, count):
+    page_form = PageForm()
+    keys = {'all': 'Все', 'кино': 'Кино', 'прогр': 'Программирование',
+            'юмор': 'Юмор', 'образ': 'Образование',
+            'курс': 'Курсы', 'игр': 'Игры', '0': 'Прошедшие', '1': 'Скоро будут'}
+
+    if page_form.validate_on_submit():
+        print('delete')
 
     if typ == 'groups':
-        filtered_groups = get_gnp_with_filter(filt)
-        print(len(filtered_groups))
-        return render_template('gnp.html', page=page_form, form=filt, groups=filtered_groups)
+        filtered_groups = get_gnp_with_filter(activ)
+        return render_template('pages.html', typ=typ, title=keys[activ], page=page_form, groups=filtered_groups)
     if typ == 'events':
-        print(filt.activity)
-        filtered_groups = get_events_with_filter(filt)
-        return render_template('events.html', page=page_form, form=filt, groups=filtered_groups)
-
-#background process happening without any refreshing
-@app.route('/background_process_test')
-def background_process_test():
-    print ("Hello")
-    if request.method == 'POST':
-        if page_form.validate_on_submit():
-            # pass
-            p_id = page_form.p_id.data
-            print('deleting')
-            # print(p_id, delete(f'http://localhost:5000/api/v1/pages/{p_id}'))
-            # return redirect('/vkg/filter/groups/all')
-    return ("nothing")
+        filtered_groups = get_events_with_filter(activ)
+        return render_template('pages.html', typ=typ, title=keys[activ], page=page_form, groups=filtered_groups)
 
 
 if __name__ == '__main__':

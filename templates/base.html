@@ -22,18 +22,16 @@
             </div>
 
             {% if current_user.is_authenticated %}
+                <div class="mr-3">
+                    <img src={{current_user.photo}} class="rounded">
+                    <a href="/logout" style="color: #ffffff;">Выйти</a>
 
-                    <div class="mr-3">
-                        <a href="/deleted" style="color: #ffffff;">Недавно удаленные</a>
-                        <a href="/logout" style="color: #ffffff;">Выйти</a>
-                        <img src={{current_user.photo}} class="rounded">
-                    </div>
-
-                {% else %}
-                    <p>
-                        <a href="/login" style="color: #ffffff;">Войти</a>
-                    </p>
-                {% endif %}
+                </div>
+            {% else %}
+                <div class="mr-3">
+                    <a href="/login" style="color: #ffffff;">Войти</a>
+                </div>
+            {% endif %}
         </nav>
     </header>
     <!-- Begin page content -->

@@ -8,7 +8,7 @@ from sqlalchemy_serializer import SerializerMixin
 
 
 class EventFilterForm(FlaskForm):
-    activity = SelectField('События', choices=[('all', 'Все'), (0, 'Прошедшие'),
-                                              (1, 'Скоро будут')])
+    activity = SelectField('События', choices=[('all', 'Все'), ('0', 'Прошедшие'),
+                                              ('1', 'Скоро будут')])
 
     submit = SubmitField('Show')

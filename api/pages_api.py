@@ -25,6 +25,7 @@ def abort_if_users_not_found(page_id):
 
 class PageResource(Resource):
     def delete(self, p_id):  # doesn`t work
+        print('DELETE', p_id)
         with open('api/deleted.txt', 'a+') as f:
             try:
                 f.write(f"{p_id}\n")
@@ -101,15 +102,22 @@ class EventsListResource(Resource):
 
                 if activity == 'all':
                     res.append(page)
+                    now = datetime.datetime.now().date()
+                    #print(now, format_vk_event_date(page['activity']))
 
-                now = datetime.datetime.now().date()
-                # print(now, format_vk_event_date(group['activity']))
+
                 # print(activity)
-                if now > format_vk_event_date(page['activity']) and activity == '0':
-                    print('yes 0')
-                    res.append(page)
-                elif now < format_vk_event_date(page['activity']) and activity == '1':
-                    res.append(page)
+                else:
+                    #print(now, format_vk_event_date(page['activity']))
+                    now = datetime.datetime.now().date()
+                    if now > format_vk_event_date(page['activity']) and str(activity) == '0':
+                        print('yes 0')
+                        res.append(page)
+                    elif now < format_vk_event_date(page['activity']) and activity == '1':
+                        res.append(page)
 
-        return jsonify({'pages': res})
+        if res:
+            return jsonify({'pages': res})
+        else:
+            return jsonify({'error'})
     # подключить ресурс в мэйн
