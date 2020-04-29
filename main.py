@@ -12,17 +12,12 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from forms.login_form import LoginForm
 from forms.filter import FilterForm
 from forms.page_form import PageForm
-from forms.group_filter import GroupFilterForm
 from forms.events_form import EventFilterForm
 import vk_api
 from vk_api import VkApiError
 
 from data import db_session
 from data.users import User
-
-from jinja2 import contextfunction, environmentfunction
-
-# from test_async import format_vk_event_date
 
 app = Flask(__name__)
 api = Api(app)
@@ -53,7 +48,7 @@ def preload(typ, count):
     """
     Предзагрука сообществ в данные о сессии.
     :param typ: тип сообщества
-    :param count: количество предзагружаемых сообществ. Если -1, то загружает все сообщества.
+    :param count: количество предзагружаемых сообществ.
     :param fields: поля фильтра сообществ
     :return:
     """
@@ -112,8 +107,6 @@ def login():
             user.login = form.email.data
             user.set_password(form.password.data)
 
-        # TOKEN = '1f0fe2dd1f0fe2dd1f0fe2dd6d1f7f630011f0f1f0fe2dd4175ea63ac4d725532953f49'
-
         vk_session = vk_api.VkApi(form.email.data, form.password.data, scope='groups')
         vk = vk_session.get_api()
 
@@ -134,6 +127,7 @@ def login():
         session[f'user_publics'] = list()
         session[f'user_groups'] = list()
         session[f'user_events'] = list()
+        session['deleted'] = list()
 
         return redirect('choice')
 
@@ -192,7 +186,7 @@ def filt(typ, count):
     if request.method == 'POST':
         return redirect(f"/filtered_pages/{typ}/{activ}/{count}")
 
-    return render_template('gnp.html', form=filt)
+    return render_template('gnp.html', typ=typ, form=filt)
 
 
 @app.route('/filtered_pages/<typ>/<activ>/<count>', methods=['GET', 'POST'])
@@ -202,15 +196,23 @@ def filtered_pages(typ, activ, count):
             'юмор': 'Юмор', 'образ': 'Образование',
             'курс': 'Курсы', 'игр': 'Игры', '0': 'Прошедшие', '1': 'Скоро будут'}
 
-    if page_form.validate_on_submit():
-        print('delete')
+    if page_form.validate_on_submit():  # DELETING PAGE
+        p_id = int(page_form.p_id.data)
+        print(p_id)
+        # print(delete(f'http://localhost:5000/api/v1/pages/{page_form.p_id.data}').json())
 
+        print('delete', vk.groups.leave(group_id=p_id))
+
+    preload(typ, 'all')
     if typ == 'groups':
         filtered_groups = get_gnp_with_filter(activ)
-        return render_template('pages.html', typ=typ, title=keys[activ], page=page_form, groups=filtered_groups)
-    if typ == 'events':
+    else:
         filtered_groups = get_events_with_filter(activ)
-        return render_template('pages.html', typ=typ, title=keys[activ], page=page_form, groups=filtered_groups)
+
+    count = len(filtered_groups)
+    title = keys[activ]
+    return render_template('pages.html', count=count, typ=typ, title=title,
+                           page=page_form, groups=filtered_groups)
 
 
 if __name__ == '__main__':

@@ -24,9 +24,11 @@ def abort_if_users_not_found(page_id):
 
 
 class PageResource(Resource):
-    def delete(self, p_id):  # doesn`t work
+    def delete(self, p_id):
         print('DELETE', p_id)
-        with open('api/deleted.txt', 'a+') as f:
+        with open('api/deleted.txt', 'w+') as f:
+            data = f.readlines()
+            print(data)
             try:
                 f.write(f"{p_id}\n")
             except Exception as e:
@@ -99,25 +101,32 @@ class EventsListResource(Resource):
             data = f.readlines()
             for page in data:
                 page = json.loads(page)
-
+                now = datetime.datetime.now().date()
+                vk_d = format_vk_event_date(page['activity'])
+                if now > vk_d:
+                    page['was'] = 1
+                else:
+                    page['was'] = 0
                 if activity == 'all':
+
                     res.append(page)
-                    now = datetime.datetime.now().date()
+
                     #print(now, format_vk_event_date(page['activity']))
 
 
                 # print(activity)
                 else:
-                    #print(now, format_vk_event_date(page['activity']))
-                    now = datetime.datetime.now().date()
-                    if now > format_vk_event_date(page['activity']) and str(activity) == '0':
-                        print('yes 0')
+
+                    if (now > vk_d) and (str(activity) == '0'):
+                        page['was'] = 1
                         res.append(page)
-                    elif now < format_vk_event_date(page['activity']) and activity == '1':
+                    elif (now < vk_d) and (activity == '1'):
+                        page['was'] = 0
+                        page['date'] = vk_d
                         res.append(page)
 
         if res:
             return jsonify({'pages': res})
         else:
             return jsonify({'error'})
-    # подключить ресурс в мэйн
+    # не работает добавление ключей

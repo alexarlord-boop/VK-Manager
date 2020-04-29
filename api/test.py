@@ -15,4 +15,4 @@ import json
 # print(get('http://localhost:5000/api/v1/pages/groups/all').json())
 
 # EVENTS
-print(get('http://localhost:5000/api/v1/pages/events/all').json())
+print(get('http://localhost:5000/api/v1/pages/events/1').json())
