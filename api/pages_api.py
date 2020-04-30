@@ -67,7 +67,7 @@ class PublicsListResource(Resource):
                 if activity == 'all':
                     res.append(page)
 
-                elif activity in page['activity'].lower():
+                elif activity in page['activity'].lower() or activity in page['name'].lower().split():
 
                     print(page)
                     res.append(page)

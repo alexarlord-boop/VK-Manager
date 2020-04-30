@@ -107,13 +107,15 @@ def login():
             user.login = form.email.data
             user.set_password(form.password.data)
 
-        vk_session = vk_api.VkApi(form.email.data, form.password.data, scope='groups')
+        # vk_session = vk_api.VkApi(form.email.data, form.password.data, scope='groups')
+        vk_session = vk_api.VkApi(form.email.data, scope='groups')
         vk = vk_session.get_api()
 
         try:
-            vk_session.auth(token_only=True)
+            print('vk response ', vk_session.auth(token_only=True))
         except vk_api.AuthError as error_msg:
             print('vk_api:', error_msg)
+            return render_template('login.html', form=form)
 
         else:
 
@@ -123,11 +125,6 @@ def login():
             dbs.add(user)
             dbs.commit()
             login_user(user)
-
-        session[f'user_publics'] = list()
-        session[f'user_groups'] = list()
-        session[f'user_events'] = list()
-        session['deleted'] = list()
 
         return redirect('choice')
 
@@ -194,12 +191,14 @@ def filtered_pages(typ, activ, count):
     page_form = PageForm()
     keys = {'all': 'Все', 'кино': 'Кино', 'прогр': 'Программирование',
             'юмор': 'Юмор', 'образ': 'Образование',
-            'курс': 'Курсы', 'игр': 'Игры', '0': 'Прошедшие', '1': 'Скоро будут'}
+            'курс': 'Курсы', 'игр': 'Игры', 'спорт': 'Спорт',
+            'медицин': 'Медицина', 'дизайн': 'Дизайн',
+            '0': 'Прошедшие', '1': 'Скоро будут'}
 
     if page_form.validate_on_submit():  # DELETING PAGE
         p_id = int(page_form.p_id.data)
         print(p_id)
-        # print(delete(f'http://localhost:5000/api/v1/pages/{page_form.p_id.data}').json())
+        print(delete(f'http://localhost:5000/api/v1/pages/{page_form.p_id.data}').json())
 
         print('delete', vk.groups.leave(group_id=p_id))
 
