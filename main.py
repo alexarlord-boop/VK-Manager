@@ -39,7 +39,7 @@ def get_group(group_ids):
     group_ids = ','.join(list(map(str, group_ids)))
     # print(group_ids)
     groups = vk.groups.getById(group_ids=group_ids,
-                               fields=['activity'])
+                               fields=['activity', 'description', 'status'])
     # print(groups)
     return groups
 
@@ -107,8 +107,8 @@ def login():
             user.login = form.email.data
             user.set_password(form.password.data)
 
-        # vk_session = vk_api.VkApi(form.email.data, form.password.data, scope='groups')
-        vk_session = vk_api.VkApi(form.email.data, scope='groups')
+        vk_session = vk_api.VkApi(form.email.data, form.password.data, scope='groups')
+        # vk_session = vk_api.VkApi(form.email.data, scope='groups')
         vk = vk_session.get_api()
 
         try:
@@ -163,9 +163,9 @@ def choice():
         preload(title, 'all')
 
     # move links into static
-    main_choice = [{'title': 'Groups&Publics', 'link': '/vkg/filter/groups/all',
+    main_choice = [{'title': 'Группы', 'link': '/vkg/filter/groups/all',
                     'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'},
-                   {'title': 'Events', 'link': '/vkg/filter/events/all',
+                   {'title': 'События', 'link': '/vkg/filter/events/all',
                     'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'}]
 
     return render_template('choice.html', cards=main_choice)
@@ -175,6 +175,7 @@ def choice():
 def filt(typ, count):
     forms = {'groups': FilterForm(), 'events': EventFilterForm()}
     filt = forms[typ]
+    titles = {'groups': 'Группы', 'events': 'События'}
 
     print(filt.activity.data)
     activ = filt.activity.data
@@ -183,7 +184,7 @@ def filt(typ, count):
     if request.method == 'POST':
         return redirect(f"/filtered_pages/{typ}/{activ}/{count}")
 
-    return render_template('gnp.html', typ=typ, form=filt)
+    return render_template('gnp.html', typ=titles[typ], form=filt)
 
 
 @app.route('/filtered_pages/<typ>/<activ>/<count>', methods=['GET', 'POST'])

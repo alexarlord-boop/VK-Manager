@@ -13,6 +13,6 @@ class FilterForm(FlaskForm):
                                                     ('курс', 'Курсы'), ('игр', 'Игры'), ('спорт', 'Спорт'),
                                                   ('медицин', 'Медицина') , ('дизайн', 'Дизайн')])
 
-    submit = SubmitField('Show')
+    submit = SubmitField('показать')
 
     result = None

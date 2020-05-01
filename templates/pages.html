@@ -2,12 +2,18 @@
 
 {% block content%}
 <div class="nav ml-5">
-        <a class="nav-link h3" href=/vkg/filter/{{typ}}/all>{{typ}}</a>
+    {%if typ == 'events'%}
+        <a class="nav-link h3" href=/vkg/filter/{{typ}}/all>к событиям</a>
+    {%else%}
+        <a class="nav-link h3" href=/vkg/filter/{{typ}}/all>к группам</a>
+    {%endif%}
     </div>
 <h2 class="text-center m-0 p-2">{{title}}</h2>
 <div class="mx-auto col-10 ml-10">
 
-
+    {%if groups|length == 0%}
+        <h3 class="text-secondary text-center">упс! похоже у вас нет таких страниц.</h3>
+    {%else%}
     {%for g in groups%}
         <div class="row my-2 mx-2 my-3 col-10">
 
@@ -30,13 +36,15 @@
                         {%else%}
                             <h6 class="pl-2 text-success">{{g['activity']}}</h6>
                         {%endif%}
+                    {%else%}
+                        <h6 class="pl-2 text-success">  {{g['status']}}</h6>
 
                     {%endif%}
                 </div>
 
         </div>
     {%endfor%}
-
+    {%endif%}
 </div>
 
 {% endblock%}
