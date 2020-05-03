@@ -39,7 +39,7 @@ def get_group(group_ids):
     group_ids = ','.join(list(map(str, group_ids)))
     # print(group_ids)
     groups = vk.groups.getById(group_ids=group_ids,
-                               fields=['activity', 'description', 'status'])
+                               fields=['activity', 'description', 'status', 'links'])
     # print(groups)
     return groups
 
@@ -164,9 +164,10 @@ def choice():
 
     # move links into static
     main_choice = [{'title': 'Группы', 'link': '/vkg/filter/groups/all',
-                    'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'},
+                    'img': 'https://cdn.dribbble.com/users/428722/screenshots/2525532/pattern-medical.png'},
                    {'title': 'События', 'link': '/vkg/filter/events/all',
-                    'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'}]
+                    # 'img': 'https://avatars.mds.yandex.net/get-pdb/1848399/1348e1e6-0aab-4d3a-b7e0-3dedb221e434/s1200?webp=false'
+                    'img': 'https://cdn.dribbble.com/users/12516/screenshots/2381439/kmc_social.png'}]
 
     return render_template('choice.html', cards=main_choice)
 

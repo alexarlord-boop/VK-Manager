@@ -3,13 +3,14 @@
 {% block content%}
 <div class="nav ml-5">
     {%if typ == 'events'%}
-        <a class="nav-link h3" href=/vkg/filter/{{typ}}/all>к событиям</a>
+        <a class="nav-link h4" href=/vkg/filter/{{typ}}/all>к событиям</a>
     {%else%}
-        <a class="nav-link h3" href=/vkg/filter/{{typ}}/all>к группам</a>
+        <a class="nav-link h4" href=/vkg/filter/{{typ}}/all>к группам</a>
     {%endif%}
+    <h2 class="text-center m-0 pl-5 p-2">{{title}}</h2>
     </div>
-<h2 class="text-center m-0 p-2">{{title}}</h2>
-<div class="mx-auto col-10 ml-10">
+
+<div class="mx-auto col-8 ">
 
     {%if groups|length == 0%}
         <h3 class="text-secondary text-center">упс! похоже у вас нет таких страниц.</h3>
@@ -28,7 +29,7 @@
                     <img src={{g['photo_100']}} class="rounded">
                 </a></div>
                 <div class="d-inline text-break col-8 pt-3">
-                    <h5 class="my-0">{{g['name']}}</h5>
+                    <h4 class="my-0">{{g['name']}}</h4>
 
                     {%if typ == 'events'%}
                         {%if g['was'] == 1%}
