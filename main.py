@@ -9,6 +9,7 @@ from api.pages_api import PublicResource, PageResource, PublicsListResource, Gro
 from flask import Flask, session, jsonify
 from flask import render_template, redirect, request
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+from flask_ngrok import run_with_ngrok
 from forms.login_form import LoginForm
 from forms.filter import FilterForm
 from forms.page_form import PageForm
@@ -19,7 +20,9 @@ from vk_api import VkApiError
 from data import db_session
 from data.users import User
 
+
 app = Flask(__name__)
+run_with_ngrok(app)
 api = Api(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
